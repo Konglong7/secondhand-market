@@ -1,0 +1,52 @@
+# 编译输出
+backend/target/
+frontend/dist/
+frontend/node_modules/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# 日志文件
+*.log
+logs/
+
+# 临时文件
+*.tmp
+*.temp
+*.swp
+*.bak
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 上传文件
+uploads/
+docker/uploads/
+
+# Docker数据
+docker/mysql-data/
+docker/redis-data/
+
+# 环境配置
+.env
+.env.local
+.env.*.local
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# Node
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# 测试覆盖率
+coverage/
+*.coverage
