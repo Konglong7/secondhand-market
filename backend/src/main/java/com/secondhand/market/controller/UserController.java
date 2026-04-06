@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletRequest;
  * 处理用户相关的HTTP请求
  */
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/user")
 @RequiredArgsConstructor
 public class UserController {
 

@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/address")
+@RequestMapping("/address")
 @RequiredArgsConstructor
 public class AddressController {
 
