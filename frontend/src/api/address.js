@@ -5,7 +5,7 @@ import request from '@/utils/request'
  */
 export const getAddressList = () => {
   return request({
-    url: '/addresses/list',
+    url: '/address/list',
     method: 'get'
   })
 }
@@ -16,7 +16,7 @@ export const getAddressList = () => {
  */
 export const addAddress = (data) => {
   return request({
-    url: '/addresses/add',
+    url: '/address',
     method: 'post',
     data
   })
@@ -29,7 +29,7 @@ export const addAddress = (data) => {
  */
 export const updateAddress = (id, data) => {
   return request({
-    url: `/addresses/update/${id}`,
+    url: `/address/${id}`,
     method: 'put',
     data
   })
@@ -41,7 +41,7 @@ export const updateAddress = (id, data) => {
  */
 export const deleteAddress = (id) => {
   return request({
-    url: `/addresses/delete/${id}`,
+    url: `/address/${id}`,
     method: 'delete'
   })
 }
@@ -52,7 +52,7 @@ export const deleteAddress = (id) => {
  */
 export const setDefaultAddress = (id) => {
   return request({
-    url: `/addresses/default/${id}`,
+    url: `/address/${id}/default`,
     method: 'put'
   })
 }

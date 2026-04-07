@@ -18,7 +18,8 @@ public class Product {
     private BigDecimal price;
     private Integer stock;
     private String conditionLevel;
-    private String tradeMethod;
+    @TableField("trade_method")
+    private String tradeType;
     private String province;
     private String city;
     private String district;

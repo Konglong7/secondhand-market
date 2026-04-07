@@ -104,22 +104,22 @@
             <el-table-column label="操作" fixed="right" width="200">
               <template #default="{ row }">
                 <el-button
-                  v-if="row.status === 'NORMAL'"
+                  v-if="row.status === 0"
                   size="small"
                   type="warning"
-                  @click="handleUpdateUserStatus(row.id, 'FROZEN')"
+                  @click="handleUpdateUserStatus(row.id, 1)"
                 >冻结</el-button>
                 <el-button
-                  v-if="row.status === 'FROZEN'"
+                  v-if="row.status === 1"
                   size="small"
                   type="success"
-                  @click="handleUpdateUserStatus(row.id, 'NORMAL')"
+                  @click="handleUpdateUserStatus(row.id, 0)"
                 >解冻</el-button>
                 <el-button
-                  v-if="row.status !== 'BANNED'"
+                  v-if="row.status !== 2"
                   size="small"
                   type="danger"
-                  @click="handleUpdateUserStatus(row.id, 'BANNED')"
+                  @click="handleUpdateUserStatus(row.id, 2)"
                 >封禁</el-button>
               </template>
             </el-table-column>
@@ -138,9 +138,9 @@
           <h3>商品管理</h3>
           <el-radio-group v-model="productStatus" @change="loadProducts" style="margin-bottom: 20px">
             <el-radio-button label="">全部</el-radio-button>
-            <el-radio-button label="PENDING">待审核</el-radio-button>
-            <el-radio-button label="APPROVED">已通过</el-radio-button>
-            <el-radio-button label="REJECTED">已拒绝</el-radio-button>
+            <el-radio-button :label="0">待审核</el-radio-button>
+            <el-radio-button :label="1">在售</el-radio-button>
+            <el-radio-button :label="3">已下架</el-radio-button>
           </el-radio-group>
           <el-table :data="products" style="width: 100%">
             <el-table-column prop="id" label="ID" width="80" />
@@ -163,16 +163,16 @@
             <el-table-column label="操作" fixed="right" width="200">
               <template #default="{ row }">
                 <el-button
-                  v-if="row.status === 'PENDING'"
+                  v-if="row.status === 0"
                   size="small"
                   type="success"
-                  @click="handleAuditProduct(row.id, 'APPROVED')"
+                  @click="handleAuditProduct(row.id, 1)"
                 >通过</el-button>
                 <el-button
-                  v-if="row.status === 'PENDING'"
+                  v-if="row.status === 0"
                   size="small"
                   type="danger"
-                  @click="handleAuditProduct(row.id, 'REJECTED')"
+                  @click="handleAuditProduct(row.id, 3)"
                 >拒绝</el-button>
                 <el-button size="small" @click="viewProductDetail(row)">查看</el-button>
               </template>
@@ -319,7 +319,7 @@ const loadProducts = async () => {
 // 审核商品
 const handleAuditProduct = async (productId, status) => {
   try {
-    await ElMessageBox.confirm(`确定要${status === 'APPROVED' ? '通过' : '拒绝'}该商品吗？`, '提示', {
+    await ElMessageBox.confirm(`确定要${status === 1 ? '通过' : '拒绝'}该商品吗？`, '提示', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning'
@@ -368,41 +368,23 @@ const handleLogout = async () => {
 
 // 状态相关方法
 const getStatusType = (status) => {
-  const map = {
-    NORMAL: 'success',
-    FROZEN: 'warning',
-    BANNED: 'danger'
-  }
+  const map = { 0: 'success', 1: 'warning', 2: 'danger' }
   return map[status] || 'info'
 }
 
 const getStatusText = (status) => {
-  const map = {
-    NORMAL: '正常',
-    FROZEN: '冻结',
-    BANNED: '封禁'
-  }
-  return map[status] || status
+  const map = { 0: '正常', 1: '冻结', 2: '封禁' }
+  return map[status] || '未知'
 }
 
 const getProductStatusType = (status) => {
-  const map = {
-    PENDING: 'warning',
-    APPROVED: 'success',
-    REJECTED: 'danger',
-    SOLD: 'info'
-  }
+  const map = { 0: 'warning', 1: 'success', 2: 'info', 3: 'info' }
   return map[status] || 'info'
 }
 
 const getProductStatusText = (status) => {
-  const map = {
-    PENDING: '待审核',
-    APPROVED: '已通过',
-    REJECTED: '已拒绝',
-    SOLD: '已售出'
-  }
-  return map[status] || status
+  const map = { 0: '待审核', 1: '在售', 2: '已售', 3: '已下架' }
+  return map[status] || '未知'
 }
 
 onMounted(() => {

@@ -3,7 +3,7 @@ import request from '@/utils/request'
 // 创建评价
 export const createReview = (data) => {
   return request({
-    url: '/reviews/create',
+    url: '/reviews',
     method: 'post',
     data
   })
@@ -12,9 +12,9 @@ export const createReview = (data) => {
 // 回复评价
 export const replyReview = (reviewId, content) => {
   return request({
-    url: `/reviews/reply/${reviewId}`,
+    url: `/reviews/${reviewId}/reply`,
     method: 'post',
-    data: { content }
+    params: { replyContent: content }
   })
 }
 

@@ -97,16 +97,7 @@ public class PaymentServiceImpl implements PaymentService {
             order.setPayTime(LocalDateTime.now());
             orderMapper.updateById(order);
 
-            // 扣减库存
-            Product product = productMapper.selectById(order.getProductId());
-            if (product != null) {
-                int newStock = product.getStock() - order.getQuantity();
-                if (newStock < 0) {
-                    throw new RuntimeException("库存不足");
-                }
-                product.setStock(newStock);
-                productMapper.updateById(product);
-            }
+            // 库存已在创建订单时扣减，此处无需重复扣减
         }
     }
 }

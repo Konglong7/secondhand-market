@@ -3,7 +3,7 @@ import request from '@/utils/request'
 // 获取商品列表
 export const getProductList = (params) => {
   return request({
-    url: '/products/list',
+    url: '/product/list',
     method: 'get',
     params
   })
@@ -12,7 +12,7 @@ export const getProductList = (params) => {
 // 获取商品详情
 export const getProductDetail = (id) => {
   return request({
-    url: `/products/detail/${id}`,
+    url: `/product/${id}`,
     method: 'get'
   })
 }
@@ -20,7 +20,7 @@ export const getProductDetail = (id) => {
 // 发布商品
 export const publishProduct = (data) => {
   return request({
-    url: '/products/publish',
+    url: '/product/publish',
     method: 'post',
     data
   })
@@ -29,7 +29,7 @@ export const publishProduct = (data) => {
 // 更新商品
 export const updateProduct = (id, data) => {
   return request({
-    url: `/products/update/${id}`,
+    url: `/product/${id}`,
     method: 'put',
     data
   })
@@ -38,34 +38,44 @@ export const updateProduct = (id, data) => {
 // 删除商品
 export const deleteProduct = (id) => {
   return request({
-    url: `/products/delete/${id}`,
+    url: `/product/${id}`,
     method: 'delete'
   })
 }
 
-// 更新商品状态
-export const updateStatus = (id, status) => {
+// 商品上架
+export const onShelfProduct = (id) => {
   return request({
-    url: `/products/status/${id}`,
-    method: 'put',
-    data: { status }
+    url: `/product/${id}/on-shelf`,
+    method: 'put'
+  })
+}
+
+// 商品下架
+export const offShelfProduct = (id) => {
+  return request({
+    url: `/product/${id}/off-shelf`,
+    method: 'put'
   })
 }
 
 // 获取我的发布商品
 export const getMyProducts = (page = 1, size = 10) => {
   return request({
-    url: '/products/my',
+    url: '/product/my',
     method: 'get',
     params: { page, size }
   })
 }
 
-// 更新商品状态（上下架）
+// 更新商品状态（上下架）- 兼容旧调用
 export const updateProductStatus = (id, status) => {
-  return request({
-    url: `/products/status/${id}`,
-    method: 'put',
-    data: { status }
-  })
+  if (status === 1) {
+    return onShelfProduct(id)
+  } else {
+    return offShelfProduct(id)
+  }
 }
+
+// 兼容旧名称
+export const updateStatus = updateProductStatus

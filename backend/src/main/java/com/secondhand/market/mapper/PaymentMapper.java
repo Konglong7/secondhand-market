@@ -10,6 +10,6 @@ import java.math.BigDecimal;
 @Mapper
 public interface PaymentMapper extends BaseMapper<Payment> {
 
-    @Select("SELECT COALESCE(SUM(amount), 0) FROM payment WHERE status = 1")
+    @Select("SELECT COALESCE(SUM(amount), 0) FROM payment WHERE status = 1 AND deleted = 0")
     BigDecimal getTotalAmount();
 }

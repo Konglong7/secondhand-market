@@ -156,6 +156,7 @@ import { Star, ChatDotRound } from '@element-plus/icons-vue'
 import Header from '@/components/Header.vue'
 import { getProductDetail } from '@/api/product'
 import { addFavorite, removeFavorite, checkFavorite } from '@/api/favorite'
+import { getProductReviews } from '@/api/review'
 
 const route = useRoute()
 const router = useRouter()
@@ -237,19 +238,23 @@ const handleContact = () => {
 // 加载评价列表
 const loadReviews = async () => {
   try {
-    // TODO: 调用评价API
-    reviews.value = []
-    reviewTotal.value = 0
+    const res = await getProductReviews(route.params.id, reviewPage.value, reviewSize.value)
+    reviews.value = res.data?.records || res.data?.list || []
+    reviewTotal.value = res.data?.total || 0
   } catch (error) {
     console.error('加载评价失败', error)
   }
 }
 
-// 加载相似商品
+// 加载相似商品（同分类商品）
 const loadSimilarProducts = async () => {
   try {
-    // TODO: 调用相似商品API
-    similarProducts.value = []
+    if (!product.value?.categoryId) return
+    const res = await getProductDetail(route.params.id)
+    // 使用商品列表接口查同分类商品
+    const { getProductList } = await import('@/api/product')
+    const listRes = await getProductList({ categoryId: product.value.categoryId, page: 1, size: 4 })
+    similarProducts.value = (listRes.data?.records || listRes.data?.list || []).filter(p => p.id !== product.value.id).slice(0, 4)
   } catch (error) {
     console.error('加载相似商品失败', error)
   }

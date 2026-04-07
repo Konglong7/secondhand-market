@@ -165,15 +165,15 @@
                   <div class="product-title">{{ product.title }}</div>
                   <div class="product-price">¥{{ product.price }}</div>
                   <div class="product-status">
-                    <el-tag :type="product.status === 'ON_SALE' ? 'success' : 'info'">
-                      {{ product.status === 'ON_SALE' ? '在售' : '已下架' }}
+                    <el-tag :type="product.status === 1 ? 'success' : 'info'">
+                      {{ product.status === 1 ? '在售' : '已下架' }}
                     </el-tag>
                     <span class="product-views">浏览 {{ product.views || 0 }}</span>
                   </div>
                 </div>
                 <div class="product-actions">
                   <el-button
-                    v-if="product.status === 'ON_SALE'"
+                    v-if="product.status === 1"
                     type="warning"
                     size="small"
                     @click="handleOffShelf(product.id)"
@@ -368,6 +368,7 @@ import {
 } from '@element-plus/icons-vue'
 import Header from '@/components/Header.vue'
 import { getUserInfo } from '@/api/auth'
+import { updateUserInfo as updateUserInfoApi, changePassword as changePasswordApi } from '@/api/user'
 import {
   getAddressList,
   addAddress,
@@ -375,7 +376,7 @@ import {
   deleteAddress,
   setDefaultAddress
 } from '@/api/address'
-import { getMyProducts, deleteProduct, updateProductStatus } from '@/api/product'
+import { getMyProducts, deleteProduct, onShelfProduct, offShelfProduct } from '@/api/product'
 import { getFavorites, cancelFavorite } from '@/api/favorite'
 
 const router = useRouter()
@@ -443,8 +444,12 @@ const loadUserInfo = async () => {
 // 更新用户信息
 const handleUpdateInfo = async () => {
   try {
-    // TODO: 调用更新用户信息API
+    await updateUserInfoApi({
+      nickname: userForm.value.nickname,
+      avatar: userForm.value.avatar
+    })
     ElMessage.success('保存成功')
+    loadUserInfo()
   } catch (error) {
     ElMessage.error('保存失败')
   }
@@ -573,7 +578,7 @@ const loadMyProducts = async () => {
 // 上架商品
 const handleOnShelf = async (id) => {
   try {
-    await updateProductStatus(id, 'ON_SALE')
+    await onShelfProduct(id)
     ElMessage.success('商品已上架')
     loadMyProducts()
   } catch (error) {
@@ -584,7 +589,7 @@ const handleOnShelf = async (id) => {
 // 下架商品
 const handleOffShelf = async (id) => {
   try {
-    await updateProductStatus(id, 'OFF_SHELF')
+    await offShelfProduct(id)
     ElMessage.success('商品已下架')
     loadMyProducts()
   } catch (error) {
@@ -651,7 +656,7 @@ const handleChangePassword = async () => {
   }
 
   try {
-    // TODO: 调用修改密码API
+    await changePasswordApi(passwordForm.value.oldPassword, passwordForm.value.newPassword)
     ElMessage.success('密码修改成功')
     passwordForm.value = {
       oldPassword: '',

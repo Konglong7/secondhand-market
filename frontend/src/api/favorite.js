@@ -3,16 +3,15 @@ import request from '@/utils/request'
 // 添加收藏
 export const addFavorite = (productId) => {
   return request({
-    url: '/favorites/add',
-    method: 'post',
-    data: { productId }
+    url: `/favorites/${productId}`,
+    method: 'post'
   })
 }
 
 // 取消收藏
 export const removeFavorite = (productId) => {
   return request({
-    url: `/favorites/remove/${productId}`,
+    url: `/favorites/${productId}`,
     method: 'delete'
   })
 }
@@ -20,7 +19,7 @@ export const removeFavorite = (productId) => {
 // 获取收藏列表
 export const getFavoriteList = (page = 1, size = 10) => {
   return request({
-    url: '/favorites/list',
+    url: '/favorites',
     method: 'get',
     params: { page, size }
   })
@@ -29,13 +28,13 @@ export const getFavoriteList = (page = 1, size = 10) => {
 // 检查是否已收藏
 export const checkFavorite = (productId) => {
   return request({
-    url: `/favorites/check/${productId}`,
+    url: `/favorites/${productId}/check`,
     method: 'get'
   })
 }
 
 // 获取收藏列表（别名）
-export const getFavorites = (page = 1, size = 10) => {
+export const getFavorites = (page, size) => {
   return getFavoriteList(page, size)
 }
 

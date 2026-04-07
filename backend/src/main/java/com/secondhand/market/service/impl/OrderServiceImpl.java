@@ -83,9 +83,19 @@ public class OrderServiceImpl implements OrderService {
         order.setSellerId(product.getUserId());
         order.setAddressId(address.getId());
         order.setQuantity(request.getQuantity());
+        order.setProductPrice(product.getPrice());
         order.setTotalPrice(product.getPrice().multiply(new BigDecimal(request.getQuantity())));
+        order.setProductTitle(product.getTitle());
         order.setBuyerMessage(request.getBuyerMessage());
         order.setStatus(0); // 待付款
+        // 获取商品主图
+        ProductImage mainImage = imageMapper.selectOne(new LambdaQueryWrapper<ProductImage>()
+                .eq(ProductImage::getProductId, product.getId())
+                .orderByAsc(ProductImage::getSortOrder)
+                .last("LIMIT 1"));
+        if (mainImage != null) {
+            order.setProductImage(mainImage.getImageUrl());
+        }
         orderMapper.insert(order);
 
         return order.getOrderNo();

@@ -82,6 +82,7 @@ import {
   ShoppingBag
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import { getUnreadCount } from '@/api/notification'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -94,6 +95,20 @@ const defaultAvatar = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726
 const loadUserInfo = async () => {
   if (userStore.token && !userStore.userInfo) {
     await userStore.getUserInfo()
+  }
+}
+
+// 加载未读通知数量
+const loadUnreadCount = async () => {
+  if (userStore.token) {
+    try {
+      const res = await getUnreadCount()
+      if (res.code === 200) {
+        unreadCount.value = res.data || 0
+      }
+    } catch (e) {
+      // 静默忽略
+    }
   }
 }
 
@@ -128,6 +143,7 @@ const handleCommand = (command) => {
 
 onMounted(() => {
   loadUserInfo()
+  loadUnreadCount()
 })
 </script>
 

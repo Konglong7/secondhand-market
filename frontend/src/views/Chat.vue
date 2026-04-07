@@ -195,7 +195,7 @@ const formatTime = (time) => {
 
 // WebSocket连接
 const connectWebSocket = () => {
-  ws.value = new WebSocket(`ws://localhost:8080/api/ws/chat?token=${token}`)
+  ws.value = new WebSocket(`ws://localhost:8081/api/ws/chat?token=${token}`)
 
   ws.value.onopen = () => {
     console.log('WebSocket连接成功')

@@ -71,4 +71,17 @@ public class ProductController {
         ProductVO productVO = productService.getProductDetail(id);
         return Result.success(productVO);
     }
+
+    /**
+     * 获取当前用户发布的商品列表
+     */
+    @GetMapping("/my")
+    public Result<Page<ProductListVO>> getMyProducts(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size,
+            Authentication authentication) {
+        Long userId = (Long) authentication.getPrincipal();
+        Page<ProductListVO> result = productService.getUserProducts(userId, page, size);
+        return Result.success(result);
+    }
 }

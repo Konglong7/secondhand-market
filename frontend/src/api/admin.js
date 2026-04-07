@@ -63,7 +63,7 @@ export const updateUserStatus = (userId, status) => {
   })
 }
 
-// 获取商品列表
+// 获取商品列表（管理员）
 export const getProductList = (status = null, page = 1, size = 20) => {
   return adminRequest({
     url: '/admin/products',
@@ -75,9 +75,9 @@ export const getProductList = (status = null, page = 1, size = 20) => {
 // 审核商品
 export const auditProduct = (productId, status) => {
   return adminRequest({
-    url: '/admin/products/audit',
+    url: `/admin/products/${productId}/audit`,
     method: 'put',
-    data: { productId, status }
+    params: { status }
   })
 }
 

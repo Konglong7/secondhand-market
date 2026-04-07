@@ -7,6 +7,10 @@ import com.secondhand.market.dto.UserStatusRequest;
 import com.secondhand.market.entity.User;
 import com.secondhand.market.service.AdminService;
 import com.secondhand.market.vo.AdminLoginVO;
+import com.secondhand.market.entity.Product;
+import com.secondhand.market.mapper.ProductMapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.secondhand.market.vo.StatisticsVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +23,8 @@ import javax.validation.Valid;
 public class AdminController {
 
     private final AdminService adminService;
+
+    private final ProductMapper productMapper;
 
     @PostMapping("/login")
     public Result<AdminLoginVO> login(@Valid @RequestBody AdminLoginRequest request) {
@@ -47,6 +53,24 @@ public class AdminController {
             @RequestParam Integer status) {
         adminService.auditProduct(productId, status);
         return Result.success();
+    }
+
+    /**
+     * 获取商品列表（管理员）
+     */
+    @GetMapping("/products")
+    public Result<Page<Product>> getProductList(
+            @RequestParam(required = false) Integer status,
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size) {
+        Page<Product> productPage = new Page<>(page, size);
+        LambdaQueryWrapper<Product> wrapper = new LambdaQueryWrapper<>();
+        if (status != null) {
+            wrapper.eq(Product::getStatus, status);
+        }
+        wrapper.orderByDesc(Product::getCreateTime);
+        productPage = productMapper.selectPage(productPage, wrapper);
+        return Result.success(productPage);
     }
 
     @GetMapping("/statistics")

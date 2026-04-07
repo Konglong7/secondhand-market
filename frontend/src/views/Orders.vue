@@ -48,7 +48,7 @@
                 <div class="order-footer">
                   <div class="order-actions">
                     <el-button
-                      v-if="order.status === 'PENDING_PAYMENT'"
+                      v-if="order.status === 0"
                       type="danger"
                       size="small"
                       @click="handlePay(order)"
@@ -56,14 +56,14 @@
                       立即付款
                     </el-button>
                     <el-button
-                      v-if="order.status === 'PENDING_PAYMENT'"
+                      v-if="order.status === 0"
                       size="small"
                       @click="handleCancel(order.id)"
                     >
                       取消订单
                     </el-button>
                     <el-button
-                      v-if="order.status === 'SHIPPED'"
+                      v-if="order.status === 2"
                       type="primary"
                       size="small"
                       @click="handleConfirmReceive(order.id)"
@@ -71,14 +71,14 @@
                       确认收货
                     </el-button>
                     <el-button
-                      v-if="order.status === 'SHIPPED' || order.status === 'COMPLETED'"
+                      v-if="order.status === 2 || order.status === 3"
                       size="small"
                       @click="handleViewExpress(order)"
                     >
                       查看物流
                     </el-button>
                     <el-button
-                      v-if="order.status === 'COMPLETED'"
+                      v-if="order.status === 3"
                       size="small"
                       @click="handleEvaluate(order)"
                     >
@@ -145,7 +145,7 @@
                 <div class="order-footer">
                   <div class="order-actions">
                     <el-button
-                      v-if="order.status === 'PAID'"
+                      v-if="order.status === 1"
                       type="primary"
                       size="small"
                       @click="handleShip(order)"
@@ -254,10 +254,11 @@ const total = ref(0)
 
 const statusList = [
   { label: '全部', value: '' },
-  { label: '待付款', value: 'PENDING_PAYMENT' },
-  { label: '待发货', value: 'PAID' },
-  { label: '待收货', value: 'SHIPPED' },
-  { label: '已完成', value: 'COMPLETED' }
+  { label: '待付款', value: 0 },
+  { label: '待发货', value: 1 },
+  { label: '待收货', value: 2 },
+  { label: '已完成', value: 3 },
+  { label: '已取消', value: 4 }
 ]
 
 // 支付相关
@@ -277,8 +278,9 @@ const loadOrders = async () => {
   loading.value = true
   try {
     const apiFunc = activeTab.value === 'buyer' ? getBuyerOrders : getSellerOrders
-    const res = await apiFunc(currentStatus.value, currentPage.value, pageSize.value)
-    orderList.value = res.data.list || []
+    const statusParam = currentStatus.value === '' ? null : currentStatus.value
+    const res = await apiFunc(statusParam, currentPage.value, pageSize.value)
+    orderList.value = res.data.records || res.data.list || []
     total.value = res.data.total || 0
   } catch (error) {
     ElMessage.error('加载订单列表失败')
@@ -303,26 +305,14 @@ const changeStatus = (status) => {
 
 // 获取状态类型
 const getStatusType = (status) => {
-  const typeMap = {
-    PENDING_PAYMENT: 'warning',
-    PAID: 'info',
-    SHIPPED: 'primary',
-    COMPLETED: 'success',
-    CANCELLED: 'info'
-  }
+  const typeMap = { 0: 'warning', 1: 'info', 2: 'primary', 3: 'success', 4: 'info' }
   return typeMap[status] || 'info'
 }
 
 // 获取状态文本
 const getStatusText = (status) => {
-  const textMap = {
-    PENDING_PAYMENT: '待付款',
-    PAID: '待发货',
-    SHIPPED: '待收货',
-    COMPLETED: '已完成',
-    CANCELLED: '已取消'
-  }
-  return textMap[status] || status
+  const textMap = { 0: '待付款', 1: '待发货', 2: '待收货', 3: '已完成', 4: '已取消' }
+  return textMap[status] || '未知'
 }
 
 // 支付订单
@@ -335,7 +325,7 @@ const handlePay = (order) => {
 // 确认支付
 const confirmPay = async () => {
   try {
-    await payOrder(currentOrder.value.id, paymentType.value)
+    await payOrder(currentOrder.value.id)
     ElMessage.success('支付成功')
     showPayDialog.value = false
     loadOrders()

@@ -6,7 +6,7 @@ import request from '@/utils/request'
  */
 export const createOrder = (data) => {
   return request({
-    url: '/orders/create',
+    url: '/order/create',
     method: 'post',
     data
   })
@@ -15,13 +15,11 @@ export const createOrder = (data) => {
 /**
  * 支付订单
  * @param {number} orderId - 订单ID
- * @param {string} paymentType - 支付方式 (alipay/wechat)
  */
-export const payOrder = (orderId, paymentType) => {
+export const payOrder = (orderId) => {
   return request({
-    url: `/orders/pay/${orderId}`,
-    method: 'post',
-    data: { paymentType }
+    url: `/order/pay/${orderId}`,
+    method: 'post'
   })
 }
 
@@ -33,7 +31,7 @@ export const payOrder = (orderId, paymentType) => {
  */
 export const shipOrder = (orderId, expressCompany, expressNo) => {
   return request({
-    url: '/orders/ship',
+    url: '/order/ship',
     method: 'post',
     data: { orderId, expressCompany, expressNo }
   })
@@ -45,7 +43,7 @@ export const shipOrder = (orderId, expressCompany, expressNo) => {
  */
 export const confirmReceive = (orderId) => {
   return request({
-    url: `/orders/receive/${orderId}`,
+    url: `/order/receive/${orderId}`,
     method: 'post'
   })
 }
@@ -56,20 +54,20 @@ export const confirmReceive = (orderId) => {
  */
 export const cancelOrder = (orderId) => {
   return request({
-    url: `/orders/cancel/${orderId}`,
+    url: `/order/cancel/${orderId}`,
     method: 'post'
   })
 }
 
 /**
  * 获取买家订单列表
- * @param {string} status - 订单状态
+ * @param {number} status - 订单状态（Integer）
  * @param {number} page - 页码
  * @param {number} size - 每页数量
  */
 export const getBuyerOrders = (status, page = 1, size = 10) => {
   return request({
-    url: '/orders/buyer',
+    url: '/order/buyer/list',
     method: 'get',
     params: { status, page, size }
   })
@@ -77,13 +75,13 @@ export const getBuyerOrders = (status, page = 1, size = 10) => {
 
 /**
  * 获取卖家订单列表
- * @param {string} status - 订单状态
+ * @param {number} status - 订单状态（Integer）
  * @param {number} page - 页码
  * @param {number} size - 每页数量
  */
 export const getSellerOrders = (status, page = 1, size = 10) => {
   return request({
-    url: '/orders/seller',
+    url: '/order/seller/list',
     method: 'get',
     params: { status, page, size }
   })
@@ -95,7 +93,7 @@ export const getSellerOrders = (status, page = 1, size = 10) => {
  */
 export const getOrderDetail = (orderId) => {
   return request({
-    url: `/orders/detail/${orderId}`,
+    url: `/order/${orderId}`,
     method: 'get'
   })
 }

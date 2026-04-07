@@ -46,7 +46,7 @@ export const useUserStore = defineStore('user', () => {
   // 获取用户信息
   const getUserInfo = async () => {
     try {
-      const res = await request.get('/user/info')
+      const res = await request.get('/auth/info')
       if (res.code === 200) {
         userInfo.value = res.data
         return res.data
