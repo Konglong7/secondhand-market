@@ -2,6 +2,7 @@ package com.secondhand.market.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.secondhand.market.common.BusinessException;
 import com.secondhand.market.dto.AdminLoginRequest;
 import com.secondhand.market.dto.UserStatusRequest;
 import com.secondhand.market.entity.AdminUser;
@@ -16,12 +17,17 @@ import com.secondhand.market.utils.JwtUtil;
 import com.secondhand.market.vo.AdminLoginVO;
 import com.secondhand.market.vo.StatisticsVO;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 
+/**
+ * 管理员服务实现类
+ */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AdminServiceImpl implements AdminService {
@@ -34,6 +40,15 @@ public class AdminServiceImpl implements AdminService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
+    /**
+     * 管理员状态：正常
+     */
+    private static final int ADMIN_STATUS_NORMAL = 1;
+    /**
+     * 管理员状态：禁用
+     */
+    private static final int ADMIN_STATUS_DISABLED = 0;
+
     @Override
     public AdminLoginVO login(AdminLoginRequest request) {
         LambdaQueryWrapper<AdminUser> wrapper = new LambdaQueryWrapper<>();
@@ -41,18 +56,19 @@ public class AdminServiceImpl implements AdminService {
         AdminUser adminUser = adminUserMapper.selectOne(wrapper);
 
         if (adminUser == null) {
-            throw new RuntimeException("管理员不存在");
+            throw new BusinessException(404, "管理员不存在");
         }
 
-        if (adminUser.getStatus() != 1) {
-            throw new RuntimeException("管理员账号已被禁用");
+        if (adminUser.getStatus() != ADMIN_STATUS_NORMAL) {
+            throw new BusinessException(403, "管理员账号已被禁用");
         }
 
         if (!passwordEncoder.matches(request.getPassword(), adminUser.getPassword())) {
-            throw new RuntimeException("密码错误");
+            throw new BusinessException(401, "密码错误");
         }
 
         String token = jwtUtil.generateToken(adminUser.getId(), "admin_" + adminUser.getUsername());
+        log.info("管理员登录成功: username={}", adminUser.getUsername());
 
         return new AdminLoginVO(token, adminUser.getId(), adminUser.getUsername(), adminUser.getNickname());
     }
@@ -76,20 +92,22 @@ public class AdminServiceImpl implements AdminService {
     public void updateUserStatus(UserStatusRequest request) {
         User user = userMapper.selectById(request.getUserId());
         if (user == null) {
-            throw new RuntimeException("用户不存在");
+            throw new BusinessException(404, "用户不存在");
         }
 
         user.setStatus(request.getStatus());
         userMapper.updateById(user);
+        log.info("用户状态更新: userId={}, status={}", request.getUserId(), request.getStatus());
     }
 
     @Override
     public void auditProduct(Long productId, Integer status) {
         if (productMapper.selectById(productId) == null) {
-            throw new RuntimeException("商品不存在");
+            throw new BusinessException(404, "商品不存在");
         }
 
         productMapper.updateProductStatus(productId, status);
+        log.info("商品审核: productId={}, status={}", productId, status);
     }
 
     @Override

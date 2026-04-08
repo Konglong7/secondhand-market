@@ -1,17 +1,21 @@
 package com.secondhand.market.utils;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+/**
+ * JWT工具类
+ * 提供JWT令牌的生成、解析和验证功能
+ */
+@Slf4j
 @Component
 public class JwtUtil {
 
@@ -25,19 +29,33 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
+    /**
+     * 生成JWT令牌（默认角色为USER）
+     */
     public String generateToken(Long userId, String username) {
+        return generateToken(userId, username, "USER");
+    }
+
+    /**
+     * 生成JWT令牌
+     */
+    public String generateToken(Long userId, String username, String role) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expiration);
 
         return Jwts.builder()
                 .setSubject(String.valueOf(userId))
                 .claim("username", username)
+                .claim("role", role)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
+    /**
+     * 解析JWT令牌
+     */
     public Claims parseToken(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSignKey())
@@ -46,46 +64,57 @@ public class JwtUtil {
                 .getBody();
     }
 
+    /**
+     * 从令牌中获取用户ID
+     */
     public Long getUserIdFromToken(String token) {
         Claims claims = parseToken(token);
         return Long.parseLong(claims.getSubject());
     }
 
     /**
+     * 从令牌中获取角色
+     */
+    public String getRoleFromToken(String token) {
+        Claims claims = parseToken(token);
+        return claims.get("role", String.class);
+    }
+
+    /**
      * 验证token是否有效
-     * @param token JWT token
-     * @return 是否有效
      */
     public boolean validateToken(String token) {
         try {
             parseToken(token);
             return true;
+        } catch (ExpiredJwtException e) {
+            log.warn("JWT令牌已过期: {}", e.getMessage());
+        } catch (UnsupportedJwtException e) {
+            log.warn("JWT令牌格式不支持: {}", e.getMessage());
+        } catch (MalformedJwtException e) {
+            log.warn("JWT令牌格式错误: {}", e.getMessage());
+        } catch (SignatureException e) {
+            log.warn("JWT签名验证失败: {}", e.getMessage());
+        } catch (IllegalArgumentException e) {
+            log.warn("JWT令牌为空或格式错误: {}", e.getMessage());
         } catch (Exception e) {
-            return false;
+            log.warn("JWT验证失败: type={}, message={}", e.getClass().getSimpleName(), e.getMessage());
         }
+        return false;
     }
 
     /**
-     * 从HttpServletRequest中获取用户ID
-     * @param request HTTP请求对象
-     * @return 用户ID
+     * 检查token是否已过期
      */
-    public static Long getUserIdFromRequest(HttpServletRequest request) {
-        String token = request.getHeader("Authorization");
-        if (token != null && token.startsWith("Bearer ")) {
-            token = token.substring(7);
-        }
-
-        if (token == null || token.isEmpty()) {
-            throw new RuntimeException("未登录或token无效");
-        }
-
+    public boolean isTokenExpired(String token) {
         try {
-            // 需要从Spring容器获取JwtUtil实例
-            JwtUtil jwtUtil = SpringContextUtil.getBean(JwtUtil.class);
-            return jwtUtil.getUserIdFromToken(token);
+            Claims claims = parseToken(token);
+            return claims.getExpiration().before(new Date());
+        } catch (ExpiredJwtException e) {
+            return true;
         } catch (Exception e) {
-            throw new RuntimeException("token解析失败: " + e.getMessage());
+            log.warn("检查token过期状态失败: {}", e.getMessage());
+            return true;
         }
     }
 }

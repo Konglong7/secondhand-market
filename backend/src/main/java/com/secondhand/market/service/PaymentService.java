@@ -9,7 +9,7 @@ public interface PaymentService {
     /**
      * 模拟支付
      */
-    void simulatePayment(String paymentNo);
+    void simulatePayment(String paymentNo, Long userId);
 
     /**
      * 支付回调

@@ -3,6 +3,7 @@ package com.secondhand.market.config;
 import com.secondhand.market.filter.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -37,7 +38,20 @@ public class SecurityConfig {
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
             .authorizeRequests()
-            .antMatchers("/auth/**", "/product/list", "/product/*", "/category/**", "/uploads/**", "/admin/login").permitAll()
+            // 认证相关接口（公开）
+            .antMatchers("/auth/**").permitAll()
+            // 商品列表和详情（公开浏览）
+            .antMatchers(HttpMethod.GET, "/product/list").permitAll()
+            .antMatchers(HttpMethod.GET, "/product/{id}").permitAll()
+            // 分类接口（公开浏览）
+            .antMatchers("/category/**").permitAll()
+            // 文件上传（公开访问上传的文件）
+            .antMatchers("/uploads/**").permitAll()
+            // 管理员登录
+            .antMatchers("/admin/login").permitAll()
+            // 管理员接口需要认证
+            .antMatchers("/admin/**").authenticated()
+            // 所有其他请求需要认证
             .anyRequest().authenticated()
             .and()
             .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
@@ -48,7 +62,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:3000"));
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:5173",
+                "http://localhost:5174",
+                "http://localhost:5175",
+                "http://localhost:3000"
+        ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
